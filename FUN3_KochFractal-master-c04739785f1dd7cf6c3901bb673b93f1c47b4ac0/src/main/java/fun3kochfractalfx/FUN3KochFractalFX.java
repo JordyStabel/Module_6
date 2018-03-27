@@ -25,7 +25,7 @@ import javafx.stage.Stage;
  * @author Nico Kuijpers
  */
 public class FUN3KochFractalFX extends Application {
-    
+
     // Zoom and drag
     private double zoomTranslateX = 0.0;
     private double zoomTranslateY = 0.0;
@@ -223,7 +223,7 @@ public class FUN3KochFractalFX extends Application {
             }
         });
     }
-    
+
     private void increaseLevelButtonActionPerformed(ActionEvent event) {
         if (currentLevel < 12) {
             // resetZoom();

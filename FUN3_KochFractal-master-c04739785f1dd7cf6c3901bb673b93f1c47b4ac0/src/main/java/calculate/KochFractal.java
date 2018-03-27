@@ -6,6 +6,8 @@ package calculate;
 
 import javafx.scene.paint.Color;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
+
 /**
  *
  * @author Peter Boots
@@ -44,19 +46,19 @@ public class KochFractal {
         }
     }
 
-    public void generateLeftEdge() {
+    public synchronized void generateLeftEdge() {
         hue = 0f;
         cancelled = false;
         drawKochEdge(0.5, 0.0, (1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
     }
 
-    public void generateBottomEdge() {
+    public synchronized void generateBottomEdge() {
         hue = 1f / 3f;
         cancelled = false;
         drawKochEdge((1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, (1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
     }
 
-    public void generateRightEdge() {
+    public synchronized void generateRightEdge() {
         hue = 2f / 3f;
         cancelled = false;
         drawKochEdge((1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, 0.5, 0.0, level);
