@@ -5,27 +5,34 @@
 package calculate;
 
 import javafx.scene.paint.Color;
+import jdk.nashorn.internal.runtime.Debug;
 
 import javax.swing.plaf.synth.SynthTextAreaUI;
+
+import static calculate.EdgeType.Bottom;
+import static calculate.EdgeType.Left;
+import static calculate.EdgeType.Right;
 
 /**
  *
  * @author Peter Boots
  * Modified for FUN3 by Gertjan Schouten
  */
-public class KochFractal {
+public class KochFractal implements Runnable {
 
     private int level = 1;      // The current level of the fractal
     private int nrOfEdges = 3;  // The number of edges in the current level of the fractal
     private float hue;          // Hue value of color for next edge
     private boolean cancelled;  // Flag to indicate that calculation has been cancelled
     private KochManager manager;
+    private EdgeType edgeType;
 
-    public KochFractal(KochManager manager) {
+    public KochFractal(KochManager manager, EdgeType edgeType) {
         this.manager = manager;
+        this.edgeType = edgeType;
     }
 
-    private void drawKochEdge(double ax, double ay, double bx, double by, int n) {
+    private void drawKochEdge( double ax, double ay, double bx, double by, int n) {
         if (!cancelled) {
             if (n == 1) {
                 hue = hue + 1.0f / nrOfEdges;
@@ -49,7 +56,7 @@ public class KochFractal {
     public synchronized void generateLeftEdge() {
         hue = 0f;
         cancelled = false;
-        drawKochEdge(0.5, 0.0, (1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+        drawKochEdge( 0.5, 0.0, (1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
     }
 
     public synchronized void generateBottomEdge() {
@@ -79,5 +86,33 @@ public class KochFractal {
 
     public int getNrOfEdges() {
         return nrOfEdges;
+    }
+
+    @Override
+    public void run() {
+
+        switch (this.edgeType) {
+            case Left:
+
+                hue = 0f;
+                cancelled = false;
+                drawKochEdge( 0.5, 0.0, (1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+
+                break;
+            case Right:
+
+                hue = 2f / 3f;
+                cancelled = false;
+                drawKochEdge((1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, 0.5, 0.0, level);
+
+                break;
+            case Bottom:
+
+                hue = 1f / 3f;
+                cancelled = false;
+                drawKochEdge((1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, (1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+
+                break;
+        }
     }
 }
