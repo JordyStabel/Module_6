@@ -19,14 +19,10 @@ public class KochManager {
     private KochFractal koch;
     private ArrayList<Edge> edges;
 
-    private ArrayList<Edge> edgesLeft;
-    private ArrayList<Edge> edgesRight;
-    private ArrayList<Edge> edgesBottom;
-
     private FUN3KochFractalFX application;
     private TimeStamp tsCalc;
     private TimeStamp tsDraw;
-    
+
     public KochManager(FUN3KochFractalFX application) {
         this.edges = new ArrayList<Edge>();
 
@@ -35,7 +31,7 @@ public class KochManager {
         this.tsCalc = new TimeStamp();
         this.tsDraw = new TimeStamp();
     }
-    
+
     public void changeLevel(int nxt) {
         edges.clear();
         koch.setLevel(nxt);
@@ -106,7 +102,7 @@ public class KochManager {
         application.setTextCalc(tsCalc.toString());
         drawEdges();
     }
-    
+
     public void drawEdges() {
         tsDraw.init();
         tsDraw.setBegin("Begin drawing");
