@@ -16,10 +16,7 @@ import timeutil.TimeStamp;
  */
 public class KochManager {
 
-    private KochFractal leftKoch;
-    private KochFractal rightKoch;
-    private KochFractal bottomKoch;
-
+    private KochFractal koch;
     private ArrayList<Edge> edges;
 
     private FUN3KochFractalFX application;
@@ -29,9 +26,7 @@ public class KochManager {
     public KochManager(FUN3KochFractalFX application) {
         this.edges = new ArrayList<Edge>();
 
-        this.leftKoch = new KochFractal(this, EdgeType.Left);
-        this.rightKoch = new KochFractal(this, EdgeType.Right);
-        this.bottomKoch = new KochFractal(this, EdgeType.Bottom);
+        this.koch = new KochFractal(this);
         this.application = application;
         this.tsCalc = new TimeStamp();
         this.tsDraw = new TimeStamp();
@@ -39,58 +34,52 @@ public class KochManager {
 
     public void changeLevel(int nxt) {
         edges.clear();
-        leftKoch.run();
-        leftKoch.setLevel(nxt);
-        rightKoch.setLevel(nxt);
-        bottomKoch.setLevel(nxt);
+        koch.setLevel(nxt);
         tsCalc.init();
         tsCalc.setBegin("Begin calculating");
 
         Thread thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
-                run();
-//                try
-//                {
-//                    leftKoch.generateLeftEdge();
-//                }
-//                catch (Exception e)
-//                {
-//                    Thread.interrupted();
-//                    System.out.println(e);
-//                }
+                try
+                {
+                    koch.generateLeftEdge();
+                }
+                catch (Exception e)
+                {
+                    Thread.interrupted();
+                    System.out.println(e);
+                }
             }
         });
 
         Thread thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
-                run();
-//                try
-//                {
-//                    rightKoch.generateRightEdge();
-//                }
-//                catch (Exception e)
-//                {
-//                    Thread.interrupted();
-//                    System.out.println(e);
-//                }
+                try
+                {
+                    koch.generateRightEdge();
+                }
+                catch (Exception e)
+                {
+                    Thread.interrupted();
+                    System.out.println(e);
+                }
             }
         });
 
         Thread thread3 = new Thread(new Runnable() {
             @Override
             public void run() {
-                run();
-//                try
-//                {
-//                    bottomKoch.generateBottomEdge();
-//                }
-//                catch (Exception e)
-//                {
-//                    Thread.interrupted();
-//                    System.out.println(e);
-//                }
+                try
+                {
+                    koch.generateBottomEdge();
+                }
+                catch (Exception e)
+                {
+                    Thread.interrupted();
+                    System.out.println(e);
+                }
             }
         });
 
@@ -109,7 +98,7 @@ public class KochManager {
             System.out.println(ex.toString());
         }
         tsCalc.setEnd("End calculating");
-        application.setTextNrEdges("" + (leftKoch.getNrOfEdges() + rightKoch.getNrOfEdges() + bottomKoch.getNrOfEdges()));
+        application.setTextNrEdges("" + koch.getNrOfEdges());
         application.setTextCalc(tsCalc.toString());
         drawEdges();
     }
