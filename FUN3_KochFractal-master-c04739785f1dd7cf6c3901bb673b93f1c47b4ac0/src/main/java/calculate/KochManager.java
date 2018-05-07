@@ -18,10 +18,6 @@ import timeutil.TimeStamp;
  */
 public class KochManager implements _ChangeListener, Runnable {
 
-    private Thread leftThread;
-    private Thread rightThread;
-    private Thread bottomThread;
-
     private ArrayList<Edge> allEdges;
 
     private KochFractal kochFractalLeft;
@@ -41,7 +37,7 @@ public class KochManager implements _ChangeListener, Runnable {
     public KochManager(FUN3KochFractalFX application) {
         this.application = application;
 
-        this.allEdges = new ArrayList<Edge>();
+        this.allEdges = new ArrayList<>();
 
         kochFractalLeft = new KochFractal(TypeEdge.left);
         kochFractalRight = new KochFractal(TypeEdge.right);
@@ -57,36 +53,29 @@ public class KochManager implements _ChangeListener, Runnable {
     }
 
     public synchronized void changeLevel_1(int nxt) {
-        tsCalc = new TimeStamp();
         count = 0;
         allEdges.clear();
         kochFractalLeft.setLevel(nxt);
         kochFractalRight.setLevel(nxt);
         kochFractalBottom.setLevel(nxt);
         tsCalc.init();
+
+        pbBottom.progressProperty().bind(kochFractalBottom.progressProperty());
+        pbRight.progressProperty().bind(kochFractalRight.progressProperty());
+        pbLeft.progressProperty().bind(kochFractalLeft.progressProperty());
+
         tsCalc.setBegin("Begin calculating");
 
-        bottomThread = new Thread(kochFractalBottom);
-        rightThread = new Thread(kochFractalRight);
-        leftThread = new Thread(kochFractalLeft);
+        Thread bottomThread = new Thread(kochFractalBottom);
+        Thread rightThread = new Thread(kochFractalRight);
+        Thread leftThread = new Thread(kochFractalLeft);
 
         bottomThread.start();
         rightThread.start();
         leftThread.start();
     }
-
-    private void threadJoiner(Thread left, Thread right, Thread bottom){
-        try{
-            left.join();
-            right.join();
-            bottom.join();
-        }
-        catch (InterruptedException e){
-            e.printStackTrace();
-        }
-    }
     
-    public void changeLevel_2(){
+    private void changeLevel_2(){
         allEdges.addAll(kochFractalBottom.getAllEdges());
         allEdges.addAll(kochFractalRight.getAllEdges());
         allEdges.addAll(kochFractalLeft.getAllEdges());

@@ -22,14 +22,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.util.Observable;
-import java.util.Observer;
-
 /**
  *
  * @author Nico Kuijpers
  */
-public class FUN3KochFractalFX extends Application implements Observer {
+public class FUN3KochFractalFX extends Application {
 
     // Zoom and drag
     private double zoomTranslateX = 0.0;
@@ -43,6 +40,7 @@ public class FUN3KochFractalFX extends Application implements Observer {
     // Koch manager
     // TO DO: Create class KochManager in package calculate
     private KochManager kochManager;
+    private Thread kochThread;
     
     // Current level of Koch fractal
     private int currentLevel = 1;
@@ -61,17 +59,6 @@ public class FUN3KochFractalFX extends Application implements Observer {
     private final int kpWidth = 500;
     private final int kpHeight = 500;
 
-    // Progressbars
-    private Text textLeft = new Text("Left");
-    public Text statusLeft = new Text("Waiting");
-    public ProgressBar barLeft = new ProgressBar();
-    private Text textRight = new Text("Right");
-    public Text statusRight = new Text("Waiting");
-    public ProgressBar barRight = new ProgressBar();
-    private Text textBottom = new Text("Bottom");
-    public Text statusBottom = new Text("Waiting");
-    public ProgressBar barBottom = new ProgressBar();
-    
     @Override
     public void start(Stage primaryStage) {
        
@@ -144,6 +131,14 @@ public class FUN3KochFractalFX extends Application implements Observer {
             }
         });
         grid.add(buttonFitFractal, 14, 6);
+
+        // Progressbars
+        Text textLeft = new Text("Left");
+        ProgressBar barLeft = new ProgressBar();
+        Text textRight = new Text("Right");
+        ProgressBar barRight = new ProgressBar();
+        Text textBottom = new Text("Bottom");
+        ProgressBar barBottom = new ProgressBar();
         
         // Add mouse clicked event to Koch panel
         kochPanel.addEventHandler(MouseEvent.MOUSE_CLICKED,
@@ -172,23 +167,23 @@ public class FUN3KochFractalFX extends Application implements Observer {
         });
 
         // Adding the progressbars with their labels
-        grid.add(statusLeft, 5, 7);
         grid.add(textLeft, 0, 7);
 
         grid.add(barLeft, 3, 7);
 
-        grid.add(statusRight, 5, 8);
         grid.add(textRight, 0, 8);
 
         grid.add(barRight, 3, 8);
 
-        grid.add(statusBottom, 5, 9);
         grid.add(textBottom, 0, 9);
         grid.add(barBottom, 3, 9);
         
         // Create Koch manager and set initial level
         resetZoom();
         kochManager = new KochManager(this);
+        kochManager.updateProgress(barLeft, barRight, barBottom);
+        kochThread = new Thread(kochManager);
+        kochThread.start();
         kochManager.changeLevel_1(currentLevel);
         
         // Create the scene and add the grid pane
@@ -197,11 +192,12 @@ public class FUN3KochFractalFX extends Application implements Observer {
         root.getChildren().add(grid);
         
         // Define title and assign the scene for main window
+        primaryStage.setHeight(850);
         primaryStage.setTitle("Koch Fractal");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-    
+
     public void clearKochPanel() {
         GraphicsContext gc = kochPanel.getGraphicsContext2D();
         gc.clearRect(0.0,0.0,kpWidth,kpHeight);
@@ -325,6 +321,11 @@ public class FUN3KochFractalFX extends Application implements Observer {
                 e.color);
     }
 
+    @Override
+    public void stop(){
+        kochThread.interrupt();
+    }
+
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
      * main() serves only as fallback in case the application can not be
@@ -335,10 +336,5 @@ public class FUN3KochFractalFX extends Application implements Observer {
      */
     public static void main(String[] args) {
         launch(args);
-    }
-
-    @Override
-    public void update (Observable observable, Object o) {
-
     }
 }

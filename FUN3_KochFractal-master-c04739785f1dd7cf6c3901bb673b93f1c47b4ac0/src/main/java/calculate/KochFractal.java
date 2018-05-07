@@ -39,7 +39,7 @@ public class KochFractal extends Task<ArrayList<Edge>> {
         if (!cancelled) {
             if (n == 1) {
                 hue.setHue(hue.getHue() + 1.0f / nrOfEdges);
-                allEdges.add(new Edge(ax, ay, bx, by, Color.hsb(hue.getHue(), 1.0, 1.0)));
+                allEdges.add(new Edge(ax, ay, bx, by, Color.hsb(hue.getHue() * 360, 1.0, 1.0)));
                 updateProgress(allEdges.size(), nrOfEdges / 3);
             } else {
                 double angle = Math.PI / 3.0 + Math.atan2(by - ay, bx - ax);
@@ -79,10 +79,6 @@ public class KochFractal extends Task<ArrayList<Edge>> {
         nrOfEdges = (int) (3 * Math.pow(4, level - 1));
     }
 
-    public int getLevel() {
-        return level;
-    }
-
     public int getNrOfEdges() {
         return nrOfEdges;
     }
@@ -114,7 +110,7 @@ public class KochFractal extends Task<ArrayList<Edge>> {
         listeners.remove(changeListener);
     }
 
-    protected synchronized void changeEvent(){
+    private synchronized void changeEvent(){
         _ChangeEvent changeEvent = new _ChangeEvent(this);
 
         for (_ChangeListener subscribers : listeners){
@@ -123,7 +119,7 @@ public class KochFractal extends Task<ArrayList<Edge>> {
     }
 
     @Override
-    protected ArrayList<Edge> call() throws Exception{
+    protected ArrayList<Edge> call(){
         return edgeSwitch();
     }
 
