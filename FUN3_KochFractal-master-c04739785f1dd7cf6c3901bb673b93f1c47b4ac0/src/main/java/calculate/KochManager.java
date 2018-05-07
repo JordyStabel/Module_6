@@ -5,10 +5,10 @@
 package calculate;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
+import javafx.application.Platform;
 import fun3kochfractalfx.FUN3KochFractalFX;
-import jdk.nashorn.internal.runtime.Debug;
+import javafx.scene.control.ProgressBar;
 import timeutil.TimeStamp;
 
 /**
@@ -16,128 +16,102 @@ import timeutil.TimeStamp;
  * @author Nico Kuijpers
  * Modified for FUN3 by Gertjan Schouten
  */
-public abstract class KochManager implements Callable<Edge> {
+public class KochManager implements _ChangeListener, Runnable {
 
-    private KochFractal koch;
+    private Thread leftThread;
+    private Thread rightThread;
+    private Thread bottomThread;
 
-    private KochFractal kochLeft;
-    private KochFractal kochRight;
-    private KochFractal kochBottom;
+    private ArrayList<Edge> allEdges;
 
-    private ArrayList<Edge> edges;
+    private KochFractal kochFractalLeft;
+    private KochFractal kochFractalRight;
+    private KochFractal kochFractalBottom;
 
-    private ArrayList<Edge> edgesLeft;
-    private ArrayList<Edge> edgesRight;
-    private ArrayList<Edge> edgesBottom;
+    private int count;
 
     private FUN3KochFractalFX application;
     private TimeStamp tsCalc;
     private TimeStamp tsDraw;
 
+    private ProgressBar pbBottom;
+    private ProgressBar pbRight;
+    private ProgressBar pbLeft;
+
     public KochManager(FUN3KochFractalFX application) {
-        this.edges = new ArrayList<Edge>();
+        this.application = application;
 
-        this.edgesLeft = new ArrayList<Edge>();
-        this.edgesRight = new ArrayList<Edge>();
-        this.edgesBottom = new ArrayList<Edge>();
+        this.allEdges = new ArrayList<Edge>();
 
-        //this.koch = new KochFractal(this);
+        kochFractalLeft = new KochFractal(TypeEdge.left);
+        kochFractalRight = new KochFractal(TypeEdge.right);
+        kochFractalBottom = new KochFractal(TypeEdge.bottom);
 
-        kochLeft = new KochFractal();
-        kochRight = new KochFractal();
-        kochBottom = new KochFractal();
+        kochFractalBottom.add
 
         this.application = application;
         this.tsCalc = new TimeStamp();
         this.tsDraw = new TimeStamp();
     }
 
-    public void changeLevel(int nxt) {
-        edges.clear();
-        koch.setLevel(nxt);
+    public synchronized void changeLevel_1(int nxt) {
+        tsCalc = new TimeStamp();
+        count = 0;
+        allEdges.clear();
+        kochFractalLeft.setLevel(nxt);
+        kochFractalRight.setLevel(nxt);
+        kochFractalBottom.setLevel(nxt);
         tsCalc.init();
         tsCalc.setBegin("Begin calculating");
 
-        Thread thread1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try
-                {
-                    kochLeft.generateLeftEdge();
-                }
-                catch (Exception e)
-                {
-                    Thread.interrupted();
-                    System.out.println(e);
-                }
-            }
-        });
+        bottomThread = new Thread(kochFractalBottom);
+        rightThread = new Thread(kochFractalRight);
+        leftThread = new Thread(kochFractalLeft);
 
-        Thread thread2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try
-                {
-                    kochRight.generateRightEdge();
-                }
-                catch (Exception e)
-                {
-                    Thread.interrupted();
-                    System.out.println(e);
-                }
-            }
-        });
+        bottomThread.start();
+        rightThread.start();
+        leftThread.start();
+    }
 
-        Thread thread3 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try
-                {
-                    kochBottom.generateBottomEdge();
-                }
-                catch (Exception e)
-                {
-                    Thread.interrupted();
-                    System.out.println(e);
-                }
-            }
-        });
-
-        thread1.start();
-        thread2.start();
-        thread3.start();
-
-        try
-        {
-            thread1.join();
-            thread2.join();
-            thread3.join();
+    private void threadJoiner(Thread left, Thread right, Thread bottom){
+        try{
+            left.join();
+            right.join();
+            bottom.join();
         }
-        catch (InterruptedException ex)
-        {
-            System.out.println(ex.toString());
+        catch (InterruptedException e){
+            e.printStackTrace();
         }
-        thread1.interrupt();
-        thread2.interrupt();
-        thread3.interrupt();
-        tsCalc.setEnd("End calculating");
-        application.setTextNrEdges("" + koch.getNrOfEdges());
-        application.setTextCalc(tsCalc.toString());
+    }
+    
+    public void changeLevel_2(){
+        allEdges.addAll(kochFractalBottom.getAllEdges());
+        allEdges.addAll(kochFractalRight.getAllEdges());
+        allEdges.addAll(kochFractalLeft.getAllEdges());
+        tsCalc.setEnd("End");
+        Platform.runLater(() -> {
+            application.setTextNrEdges("" + (kochFractalLeft.getNrOfEdges() + kochFractalRight.getNrOfEdges() + kochFractalBottom.getNrOfEdges()));
+            application.setTextCalc(tsCalc.toString());
+        });
         drawEdges();
     }
 
-    public void drawEdges() {
-        tsDraw.init();
-        tsDraw.setBegin("Begin drawing");
-        application.clearKochPanel();
-        for (Edge e : edges) {
-            application.drawEdge(e);
-        }
-        tsDraw.setEnd("End drawing");
-        application.setTextDraw(tsDraw.toString());
+    public void updateProgress(ProgressBar left, ProgressBar right, ProgressBar bottom){
+        pbLeft = left;
+        pbBottom = bottom;
+        pbRight = right;
     }
 
-    public void addEdge(Edge e) {
-        edges.add(e);
+    public synchronized void drawEdges() {
+        Platform.runLater(() -> {
+            tsDraw.init();
+            tsDraw.setBegin("Begin drawing");
+            application.clearKochPanel();
+            for (Edge e : allEdges) {
+                application.drawEdge(e);
+            }
+            tsDraw.setEnd("End drawing");
+            application.setTextDraw(tsDraw.toString());
+        });
     }
 }

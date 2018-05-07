@@ -15,16 +15,21 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.input.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  *
  * @author Nico Kuijpers
  */
-public class FUN3KochFractalFX extends Application {
+public class FUN3KochFractalFX extends Application implements Observer {
 
     // Zoom and drag
     private double zoomTranslateX = 0.0;
@@ -55,6 +60,17 @@ public class FUN3KochFractalFX extends Application {
     private Canvas kochPanel;
     private final int kpWidth = 500;
     private final int kpHeight = 500;
+
+    // Progressbars
+    private Text textLeft = new Text("Left");
+    public Text statusLeft = new Text("Waiting");
+    public ProgressBar barLeft = new ProgressBar();
+    private Text textRight = new Text("Right");
+    public Text statusRight = new Text("Waiting");
+    public ProgressBar barRight = new ProgressBar();
+    private Text textBottom = new Text("Bottom");
+    public Text statusBottom = new Text("Waiting");
+    public ProgressBar barBottom = new ProgressBar();
     
     @Override
     public void start(Stage primaryStage) {
@@ -154,11 +170,26 @@ public class FUN3KochFractalFX extends Application {
                 kochPanelMouseDragged(event);
             }
         });
+
+        // Adding the progressbars with their labels
+        grid.add(statusLeft, 5, 7);
+        grid.add(textLeft, 0, 7);
+
+        grid.add(barLeft, 3, 7);
+
+        grid.add(statusRight, 5, 8);
+        grid.add(textRight, 0, 8);
+
+        grid.add(barRight, 3, 8);
+
+        grid.add(statusBottom, 5, 9);
+        grid.add(textBottom, 0, 9);
+        grid.add(barBottom, 3, 9);
         
         // Create Koch manager and set initial level
         resetZoom();
         kochManager = new KochManager(this);
-        kochManager.changeLevel(currentLevel);
+        kochManager.changeLevel_1(currentLevel);
         
         // Create the scene and add the grid pane
         Group root = new Group();
@@ -229,7 +260,7 @@ public class FUN3KochFractalFX extends Application {
             // resetZoom();
             currentLevel++;
             labelLevel.setText("Level: " + currentLevel);
-            kochManager.changeLevel(currentLevel);
+            kochManager.changeLevel_1(currentLevel);
         }
     } 
     
@@ -238,7 +269,7 @@ public class FUN3KochFractalFX extends Application {
             // resetZoom();
             currentLevel--;
             labelLevel.setText("Level: " + currentLevel);
-            kochManager.changeLevel(currentLevel);
+            kochManager.changeLevel_1(currentLevel);
         }
     } 
 
@@ -304,5 +335,10 @@ public class FUN3KochFractalFX extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void update (Observable observable, Object o) {
+
     }
 }
