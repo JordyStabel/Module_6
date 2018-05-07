@@ -92,10 +92,13 @@ public class KochFractal extends Task<ArrayList<Edge>> {
         switch (typeEdge){
             case left:
                 generateLeftEdge();
+                break;
             case right:
                 generateRightEdge();
+                break;
             case bottom:
                 generateBottomEdge();
+                break;
             default:
                 return null;
         }
@@ -103,24 +106,24 @@ public class KochFractal extends Task<ArrayList<Edge>> {
         return allEdges;
     }
 
-    public void subscribe(_ChangeListener _ChangeListener){
-        listeners.add(_ChangeListener);
+    public void subscribe(_ChangeListener changeListener){
+        listeners.add(changeListener);
     }
 
-    public void unSubscribe(_ChangeListener _ChangeListener){
-        listeners.remove(_ChangeListener);
+    public void unSubscribe(_ChangeListener changeListener){
+        listeners.remove(changeListener);
     }
 
     protected synchronized void changeEvent(){
-        _ChangeListener _ChangeListener = new _ChangeListener(this);
+        _ChangeEvent changeEvent = new _ChangeEvent(this);
 
-        for (listeners changeListnener : listeners){
-            _ChangeListener.ch
+        for (_ChangeListener subscribers : listeners){
+            subscribers.changeEvent(changeEvent);
         }
     }
 
     @Override
-    ArrayList<Edge> call() throws Exception{
+    protected ArrayList<Edge> call() throws Exception{
         return edgeSwitch();
     }
 

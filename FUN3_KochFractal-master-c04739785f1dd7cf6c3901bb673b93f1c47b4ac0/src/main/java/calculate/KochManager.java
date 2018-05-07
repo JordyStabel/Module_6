@@ -47,7 +47,9 @@ public class KochManager implements _ChangeListener, Runnable {
         kochFractalRight = new KochFractal(TypeEdge.right);
         kochFractalBottom = new KochFractal(TypeEdge.bottom);
 
-        kochFractalBottom.add
+        kochFractalBottom.subscribe(this::changeEvent);
+        kochFractalLeft.subscribe(this::changeEvent);
+        kochFractalRight.subscribe(this::changeEvent);
 
         this.application = application;
         this.tsCalc = new TimeStamp();
@@ -113,5 +115,18 @@ public class KochManager implements _ChangeListener, Runnable {
             tsDraw.setEnd("End drawing");
             application.setTextDraw(tsDraw.toString());
         });
+    }
+
+    @Override
+    public void run(){
+        // Doesn't need to do anything
+    }
+
+    @Override
+    public synchronized void changeEvent(_ChangeEvent changeEvent){
+        count++;
+        if (count == 3){
+            changeLevel_2();
+        }
     }
 }
